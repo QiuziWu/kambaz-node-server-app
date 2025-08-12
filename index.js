@@ -14,6 +14,11 @@ import WorkingWithObjects from "./Lab5/WorkingWithObjects.js";
 import SessionController from "./Lab5/SessionController.js";
 import "dotenv/config";
 import ModuleRoutes from "./Kambaz/Modules/routes.js";
+import mongoose from "mongoose";
+
+const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz-su2-2025"
+mongoose.connect(CONNECTION_STRING);
+
 
 const app = express();
 app.use(
