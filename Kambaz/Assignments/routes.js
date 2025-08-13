@@ -1,50 +1,74 @@
 import * as dao from "./dao.js";
 
 export default function AssignmentRoutes(app) {
-    const findAllAssignments = (req, res) => {
-        const assignments = dao.findAllAssignments();
-        res.json(assignments);
-    };
-
-    const findAssignmentsForCourse = (req, res) => {
-        const courseId = req.params.courseId;
-        const assignments = dao.findAssignmentsForCourse(courseId);
-        res.json(assignments);
-    };
-
-    const findAssignmentById = (req, res) => {
-        const assignmentId = req.params.assignmentId;
-        const assignment = dao.findAssignmentById(assignmentId);
-        if (assignment) {
-            res.json(assignment);
-        } else {
-            res.status(404).json({ message: "Assignment not found" });
+    const findAllAssignments = async (req, res) => {
+        try {
+            const assignments = await dao.findAllAssignments();
+            res.json(assignments);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
         }
     };
 
-    const createAssignment = (req, res) => {
-        const newAssignment = dao.createAssignment(req.body);
-        res.json(newAssignment);
-    };
-
-    const updateAssignment = (req, res) => {
-        const { assignmentId } = req.params;
-        const assignmentUpdates = req.body;
-        const updatedAssignment = dao.updateAssignment(assignmentId, assignmentUpdates);
-        if (updatedAssignment) {
-            res.json(updatedAssignment);
-        } else {
-            res.status(404).json({ message: "Assignment not found" });
+    const findAssignmentsForCourse = async (req, res) => {
+        try {
+            const courseId = req.params.courseId;
+            const assignments = await dao.findAssignmentsForCourse(courseId);
+            res.json(assignments);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
         }
     };
 
-    const deleteAssignment = (req, res) => {
-        const assignmentId = req.params.assignmentId;
-        const success = dao.deleteAssignment(assignmentId);
-        if (success) {
-            res.sendStatus(200);
-        } else {
-            res.status(404).json({ message: "Assignment not found" });
+    const findAssignmentById = async (req, res) => {
+        try {
+            const assignmentId = req.params.assignmentId;
+            const assignment = await dao.findAssignmentById(assignmentId);
+            if (assignment) {
+                res.json(assignment);
+            } else {
+                res.status(404).json({ message: "Assignment not found" });
+            }
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    };
+
+    const createAssignment = async (req, res) => {
+        try {
+            const newAssignment = await dao.createAssignment(req.body);
+            res.json(newAssignment);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    };
+
+    const updateAssignment = async (req, res) => {
+        try {
+            const { assignmentId } = req.params;
+            const assignmentUpdates = req.body;
+            const updatedAssignment = await dao.updateAssignment(assignmentId, assignmentUpdates);
+            if (updatedAssignment) {
+                res.json(updatedAssignment);
+            } else {
+                res.status(404).json({ message: "Assignment not found" });
+            }
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    };
+
+    const deleteAssignment = async (req, res) => {
+        try {
+            const assignmentId = req.params.assignmentId;
+            const deletedAssignment = await dao.deleteAssignment(assignmentId);
+            if (deletedAssignment) {
+                res.sendStatus(200);
+            } else {
+                res.status(404).json({ message: "Assignment not found" });
+            }
+        } catch (error) {
+            res.status(500).json({ message: error.message });
         }
     };
 
