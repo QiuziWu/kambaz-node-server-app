@@ -22,9 +22,22 @@ export async function findUsersForCourse(courseId) {
     return enrollments.map((enrollment) => enrollment.user);
 }
 
-export function enrollUserInCourse(user, course) {
-    const newEnrollment = { user, course, _id: `${user}-${course}` };
-    return model.create(newEnrollment);
+export async function enrollUserInCourse(user, course) {
+    try {
+        // Check if enrollment already exists
+        const existingEnrollment = await model.findOne({ user, course });
+        if (existingEnrollment) {
+            // If enrollment exists, just return it
+            return existingEnrollment;
+        }
+        
+        // Create new enrollment if it doesn't exist
+        const newEnrollment = { user, course, _id: `${user}-${course}` };
+        return await model.create(newEnrollment);
+    } catch (error) {
+        console.error("Error in enrollUserInCourse:", error);
+        throw error;
+    }
 }
 
 export function unenrollUserFromCourse(user, course) {
