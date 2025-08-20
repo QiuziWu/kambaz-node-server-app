@@ -18,6 +18,15 @@ export default function UserRoutes(app) {
         if (uid === "current") {
             uid = currentUser._id;
         }
+        
+        // For FACULTY users, return all courses they are enrolled in (which includes courses they created)
+        if (currentUser.role === "FACULTY") {
+            const courses = await enrollmentsDao.findCoursesForUser(uid);
+            res.json(courses);
+            return;
+        }
+        
+        // For other users (STUDENT, TA), return enrolled courses
         const courses = await enrollmentsDao.findCoursesForUser(uid);
         res.json(courses);
     };
