@@ -1,6 +1,7 @@
 import * as modulesDao from "../Modules/dao.js";
 import * as dao from "./dao.js";
 import * as enrollmentsDao from "../Enrollments/dao.js";
+import initCourses from "../Database/init-courses.js";
 
 export default function CourseRoutes(app) {
     const findAllCourses = async (req, res) => {
@@ -85,6 +86,18 @@ export default function CourseRoutes(app) {
         res.json(users);
     }
 
+    // Admin: Initialize courses collection (danger: clears and reseeds)
+    const initializeCourses = async (req, res) => {
+        try {
+            await initCourses();
+            const courses = await dao.findAllCourses();
+            res.json({ success: true, count: courses.length, courses });
+        } catch (e) {
+            console.error("Error initializing courses:", e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    }
+
     app.get("/api/courses/:cid/users", findUsersForCourse);
     app.get("/api/courses", findAllCourses);
     app.post("/api/courses", createCourse);
@@ -94,5 +107,6 @@ export default function CourseRoutes(app) {
     app.post("/api/courses/:courseId/modules", createModuleForCourse);
     app.delete("/api/modules/:moduleId", deleteModule);
     app.put("/api/modules/:moduleId", updateModule);
+    app.post("/api/admin/courses/init", initializeCourses);
 }
 
