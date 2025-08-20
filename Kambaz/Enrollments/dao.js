@@ -13,14 +13,11 @@ export async function findEnrollmentsForCourse(courseId) {
 }
 
 export async function findCoursesForUser(userId) {
-    console.log(`Finding courses for user: ${userId}`);
     const enrollments = await model.find({ user: userId }).populate("course");
-    console.log(`Found enrollments:`, enrollments);
     // Filter out enrollments where the referenced course no longer exists
     const courses = enrollments
         .map((enrollment) => enrollment.course)
         .filter((course) => !!course && !!course._id);
-    console.log(`Returning courses (filtered):`, courses);
     return courses;
 }
 
