@@ -126,7 +126,8 @@ export default function UserRoutes(app) {
             }
             userId = currentUser._id;
         }
-        const courses = await courseDao.findCoursesForEnrolledUser(userId);
+        // Use enrollmentsDao to fetch up-to-date enrolled courses from the database
+        const courses = await enrollmentsDao.findCoursesForUser(userId);
         res.json(courses);
     };
 
