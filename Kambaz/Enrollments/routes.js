@@ -58,6 +58,26 @@ export default function EnrollmentRoutes(app) {
         }
     };
 
+    // Admin utility: reset a user's enrollments to a fixed list
+    const resetUserEnrollments = async (req, res) => {
+        try {
+            const { userId } = req.params;
+            const { courses } = req.body; // array of courseIds
+            if (!Array.isArray(courses)) {
+                return res.status(400).json({ message: "courses must be an array" });
+            }
+            // remove all existing
+            await model.deleteMany({ user: userId });
+            // add back
+            for (const cid of courses) {
+                await dao.enrollUserInCourse(userId, cid);
+            }
+            res.json({ success: true, userId, courses });
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    };
+
     const isUserEnrolledInCourse = async (req, res) => {
         try {
             const { userId, courseId } = req.params;
@@ -74,4 +94,5 @@ export default function EnrollmentRoutes(app) {
     app.post("/api/enrollments", enrollUserInCourse);
     app.delete("/api/enrollments/user/:userId/course/:courseId", unenrollUserFromCourse);
     app.get("/api/enrollments/user/:userId/course/:courseId/check", isUserEnrolledInCourse);
+    app.post("/api/admin/enrollments/reset/:userId", resetUserEnrollments);
 } 

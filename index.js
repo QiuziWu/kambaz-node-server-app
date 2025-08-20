@@ -23,33 +23,18 @@ mongoose.connect(CONNECTION_STRING);
 
 const app = express();
 
-// Add CORS debugging middleware
-app.use((req, res, next) => {
-    console.log('Request origin:', req.headers.origin);
-    console.log('Request method:', req.method);
-    console.log('Request path:', req.path);
-    next();
-});
-
 app.use(
     cors({
         credentials: true,
         origin: function (origin, callback) {
-            // Allow requests with no origin (like mobile apps or curl requests)
             if (!origin) return callback(null, true);
-            
             const allowedOrigins = [
                 process.env.CLIENT_URL || "http://localhost:5173",
                 "https://qiuziwu-a6-kambaz-react-web-app.netlify.app",
-                "https://*.netlify.app"
             ];
-            
-            // Check if origin is in allowed list or is a netlify subdomain
-            if (allowedOrigins.includes(origin) || origin.includes('netlify.app')) {
+            if (allowedOrigins.includes(origin) || /https:\/\/.*\.netlify\.app$/.test(origin)) {
                 return callback(null, true);
             }
-            
-            console.log('CORS blocked origin:', origin);
             return callback(new Error('Not allowed by CORS'));
         },
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
