@@ -1,32 +1,26 @@
 import mongoose from "mongoose";
 import courses from "./courses.js";
-import "dotenv/config";
+import courseSchema from "../Courses/schema.js";
 
-const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz-su2-2025";
+const CourseModel = mongoose.model("CourseModel", courseSchema);
 
-async function initCourses() {
+const initCourses = async () => {
     try {
-        await mongoose.connect(CONNECTION_STRING);
-        console.log("Connected to MongoDB");
-
-        // Import the Course model
-        const { default: CourseModel } = await import("../Courses/model.js");
-
-        // Clear existing courses
+        // 清空现有课程数据
         await CourseModel.deleteMany({});
         console.log("Cleared existing courses");
-
-        // Insert new courses
+        
+        // 插入课程数据
         const result = await CourseModel.insertMany(courses);
-        console.log(`Inserted ${result.length} courses`);
-
-        console.log("Courses initialization completed successfully");
+        console.log(`Successfully initialized ${result.length} courses`);
+        
+        // 验证数据
+        const count = await CourseModel.countDocuments();
+        console.log(`Total courses in database: ${count}`);
+        
     } catch (error) {
         console.error("Error initializing courses:", error);
-    } finally {
-        await mongoose.disconnect();
-        console.log("Disconnected from MongoDB");
     }
-}
+};
 
-initCourses();
+export default initCourses;

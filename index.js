@@ -2,6 +2,7 @@ import express from "express";
 import Hello from "./Hello.js";
 import Lab5 from "./Lab5/index.js";
 import session from "express-session";
+import MongoStore from "connect-mongo";
 import UserRoutes from "./Kambaz/Users/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
 import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
@@ -31,14 +32,20 @@ const sessionOptions = {
     secret: process.env.SESSION_SECRET || "kambaz",
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: CONNECTION_STRING,
+        collectionName: "sessions"
+    }),
+    cookie: {
+        httpOnly: true,
+        secure: process.env.SERVER_ENV !== "development",
+        sameSite: process.env.SERVER_ENV !== "development" ? "none" : "lax",
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 };
 if (process.env.SERVER_ENV !== "development") {
     sessionOptions.proxy = true;
-    sessionOptions.cookie = {
-        sameSite: "none",
-        secure: true,
-        domain: process.env.SERVER_URL,
-    };
+    sessionOptions.cookie.domain = process.env.SERVER_URL;
 }
 app.use(session(sessionOptions));
 // configure body parser
@@ -58,4 +65,7 @@ WorkingWithArrays(app);
 SessionController(app);
 ModuleRoutes(app);
 
-app.listen(process.env.PORT || 4000)
+app.listen(process.env.PORT || 4000, () => {
+    console.log(`Server is running on port ${process.env.PORT || 4000}`);
+    console.log(`Database connection: ${CONNECTION_STRING}`);
+});

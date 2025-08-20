@@ -1,32 +1,26 @@
 import mongoose from "mongoose";
 import assignments from "./assignments.js";
-import "dotenv/config";
+import assignmentSchema from "../Assignments/schema.js";
 
-const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz-su2-2025";
+const AssignmentModel = mongoose.model("AssignmentModel", assignmentSchema);
 
-async function initAssignments() {
+const initAssignments = async () => {
     try {
-        await mongoose.connect(CONNECTION_STRING);
-        console.log("Connected to MongoDB");
-
-        // Import the Assignment model
-        const { default: AssignmentModel } = await import("../Assignments/model.js");
-
-        // Clear existing assignments
+        // 清空现有作业数据
         await AssignmentModel.deleteMany({});
         console.log("Cleared existing assignments");
-
-        // Insert new assignments
+        
+        // 插入作业数据
         const result = await AssignmentModel.insertMany(assignments);
-        console.log(`Inserted ${result.length} assignments`);
-
-        console.log("Assignments initialization completed successfully");
+        console.log(`Successfully initialized ${result.length} assignments`);
+        
+        // 验证数据
+        const count = await AssignmentModel.countDocuments();
+        console.log(`Total assignments in database: ${count}`);
+        
     } catch (error) {
         console.error("Error initializing assignments:", error);
-    } finally {
-        await mongoose.disconnect();
-        console.log("Disconnected from MongoDB");
     }
-}
+};
 
-initAssignments();
+export default initAssignments;

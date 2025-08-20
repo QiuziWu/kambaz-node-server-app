@@ -26,45 +26,56 @@ export default function CourseRoutes(app) {
             res.status(404).json({ message: "Course not found" });
         }
     }
+    
     const updateCourse = async (req, res) => {
         const { courseId } = req.params;
         const courseUpdates = req.body;
         const status = await dao.updateCourse(courseId, courseUpdates);
         res.send(status);
     }
+    
     const findModulesForCourse = async (req, res) => {
         const courseId = req.params.courseId;
         const modules = await modulesDao.findModulesForCourse(courseId);
         res.json(modules);
     }
+    
     const createModuleForCourse = async (req, res) => {
-        const { courseId } = req.params;
-        const module = {
-            ...req.body,
-            course: courseId,
-        };
-        const newModule = await modulesDao.createModule(module);
-        res.json(newModule);
-    }
-
-    const deleteModule = (req, res) => {
-        const moduleId = req.params.moduleId;
-        const success = dao.deleteModule(moduleId);
-        if (success) {
-            res.sendStatus(200);
-        } else {
-            res.status(404).json({ message: "Module not found" });
+        try {
+            const { courseId } = req.params;
+            const module = {
+                ...req.body,
+                course: courseId,
+            };
+            const newModule = await modulesDao.createModule(module);
+            res.json(newModule);
+        } catch (error) {
+            console.error("Error creating module:", error);
+            res.status(500).json({ success: false, error: error.message });
         }
     }
 
-    const updateModule = (req, res) => {
-        const { moduleId } = req.params;
-        const moduleUpdates = req.body;
-        const updatedModule = dao.updateModule(moduleId, moduleUpdates);
-        if (updatedModule) {
+    const deleteModule = async (req, res) => {
+        try {
+            const moduleId = req.params.moduleId;
+            const status = await modulesDao.deleteModule(moduleId);
+            res.json({ success: true, deletedCount: status.deletedCount });
+        } catch (error) {
+            console.error("Error deleting module:", error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    const updateModule = async (req, res) => {
+        try {
+            const { moduleId } = req.params;
+            const moduleUpdates = req.body;
+            const status = await modulesDao.updateModule(moduleId, moduleUpdates);
+            const updatedModule = await modulesDao.findModuleById(moduleId);
             res.json(updatedModule);
-        } else {
-            res.status(404).json({ message: "Module not found" });
+        } catch (error) {
+            console.error("Error updating module:", error);
+            res.status(500).json({ success: false, error: error.message });
         }
     }
 

@@ -27,14 +27,28 @@ export default function UserRoutes(app) {
         res.json(user);
     };
     const deleteUser = async (req, res) => {
-        const userId = req.params.userId;
-        await dao.deleteUser(userId);
-        res.sendStatus(200);
+        try {
+            const userId = req.params.userId;
+            const result = await dao.deleteUser(userId);
+            if (result) {
+                res.sendStatus(200);
+            } else {
+                res.status(404).json({ message: "User not found" });
+            }
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
     };
     const findAllUsers = async (req, res) => {
         const { role, name } = req.query;
         if (role) {
             const users = await dao.findUsersByRole(role);
+            res.json(users);
+            return;
+        }
+        if (name) {
+            const users = await dao.findUsersByPartialName(name);
             res.json(users);
             return;
         }
